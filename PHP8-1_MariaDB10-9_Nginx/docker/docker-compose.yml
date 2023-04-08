@@ -1,0 +1,44 @@
+version: '3.5'
+
+# Services
+services:
+
+  # PHP FPM Service
+  php:
+    container_name: php
+    build:
+      dockerfile: php-dockerfile
+      context: .
+    volumes:
+      - '../:/var/www/html'
+      - './php-logging.conf:/usr/local/etc/php-fpm.d/zz-log.conf'
+    depends_on:
+      - mariadb
+
+  # Nginx Service
+  nginx:
+    container_name: web
+    image: nginx:latest
+    ports:
+      - 8080:80
+    links:
+      - 'php'
+    volumes:
+      - '../:/var/www/html'
+      - './nginx-conf:/etc/nginx/conf.d'
+    depends_on:
+      - php
+
+  # MariaDB Service
+  mariadb:
+    container_name: db
+    image: mariadb:10.9
+    environment:
+      MYSQL_ROOT_PASSWORD: YOURPASSWORDHERE
+    volumes:
+      - './mysqldata:/var/lib/mysql'
+
+# Volumes
+volumes:
+  mysqldata:
+
